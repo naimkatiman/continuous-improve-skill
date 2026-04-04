@@ -1,0 +1,23 @@
+{
+  "name": "continuous-improve",
+  "version": "1.0.0",
+  "description": "Install structured self-improvement loops into any AI agent — research, plan, execute, verify, reflect, iterate",
+  "author": "naimkatiman",
+  "license": "MIT",
+  "repository": "https://github.com/naimkatiman/continuous-improve-skill",
+  "skills": [
+    {
+      "name": "continuous-improve",
+      "description": "Install structured self-improvement loops into any AI agent — research, plan, execute, verify, reflect, iterate",
+      "file": "SKILL.md",
+      "triggers": [
+        "use the continuous-improve framework",
+        "follow the improvement loop",
+        "research plan execute verify reflect",
+        "structured improvement"
+      ]
+    }
+  ],
+  "tags": ["productivity", "agent", "discipline", "workflow", "self-improvement"],
+  "compatibleWith": ["claude", "claude-code", "codex", "opencode", "openclaw"]
+}
