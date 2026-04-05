@@ -1,0 +1,58 @@
+[
+  {
+    "id": "react-check-existing-components",
+    "trigger": "when creating a new React component",
+    "body": "Search the codebase for existing components that solve the same problem before creating new ones. Check shared/, components/, and ui/ directories.",
+    "confidence": 0.65,
+    "domain": "workflow"
+  },
+  {
+    "id": "react-prefer-server-components",
+    "trigger": "when creating components in Next.js App Router",
+    "body": "Default to Server Components. Only add 'use client' when the component needs useState, useEffect, event handlers, or browser APIs.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "react-key-prop-lists",
+    "trigger": "when rendering lists with .map()",
+    "body": "Always use a stable, unique key prop. Never use array index as key unless the list is static and never reordered.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "react-effect-cleanup",
+    "trigger": "when writing useEffect with subscriptions or timers",
+    "body": "Always return a cleanup function from useEffect when setting up subscriptions, event listeners, or timers to prevent memory leaks.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "react-memo-expensive",
+    "trigger": "when a component re-renders with expensive calculations",
+    "body": "Use useMemo for expensive computations and React.memo for components that receive the same props frequently. Don't memo everything — only what's measurably slow.",
+    "confidence": 0.6,
+    "domain": "patterns"
+  },
+  {
+    "id": "react-form-validation",
+    "trigger": "when building forms",
+    "body": "Check if react-hook-form or zod is already in the project before building custom form validation. Prefer library solutions over hand-rolled validation.",
+    "confidence": 0.65,
+    "domain": "tooling"
+  },
+  {
+    "id": "react-error-boundary",
+    "trigger": "when adding a new page or route",
+    "body": "Ensure error boundaries exist around new pages/routes. In Next.js App Router, add error.tsx. In other React apps, wrap with ErrorBoundary component.",
+    "confidence": 0.6,
+    "domain": "patterns"
+  },
+  {
+    "id": "react-test-user-behavior",
+    "trigger": "when writing React component tests",
+    "body": "Test user behavior, not implementation details. Use @testing-library/react. Query by role, label, or text — not by class name or test ID.",
+    "confidence": 0.65,
+    "domain": "testing"
+  }
+]

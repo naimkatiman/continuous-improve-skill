@@ -1,8 +1,8 @@
 {
   "name": "continuous-improvement",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "mode": "expert",
-  "description": "Full plugin: 8 tools including instinct management, import/export, observation viewer, and manual instinct creation.",
+  "description": "Full plugin: 10 tools including instinct management, import/export, observation viewer, dashboard, and instinct packs.",
   "tools": [
     {
       "name": "ci_status",
@@ -35,6 +35,14 @@
     {
       "name": "ci_import",
       "what": "Import instincts from JSON (skip duplicates)"
+    },
+    {
+      "name": "ci_dashboard",
+      "what": "Visual dashboard showing instinct health, confidence distribution, and learning progress"
+    },
+    {
+      "name": "ci_load_pack",
+      "what": "Load starter instinct packs (react, python, go) into the current project"
     }
   ],
   "setup": {

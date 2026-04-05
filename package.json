@@ -1,7 +1,7 @@
 {
   "name": "continuous-improvement",
-  "version": "3.0.0",
-  "description": "The 7 Laws of AI Agent Discipline — stop your agent from skipping steps, guessing, and declaring 'done' without verifying. Auto-leveling instinct learning with MCP server plugin for Claude Code, Cursor, Codex, Gemini CLI.",
+  "version": "3.1.0",
+  "description": "The 7 Laws of AI Agent Discipline — stop your agent from skipping steps, guessing, and declaring 'done' without verifying. Auto-leveling instinct learning with MCP server, GitHub Action transcript linter, and starter instinct packs for Claude Code, Cursor, Codex, Gemini CLI.",
   "keywords": [
     "claude-code",
     "claude-code-skill",
@@ -20,7 +20,13 @@
     "continuous-improvement",
     "mcp",
     "mcp-server",
-    "plugin"
+    "plugin",
+    "github-action",
+    "transcript-linter",
+    "agent-discipline",
+    "developer-tools",
+    "anthropic",
+    "llm"
   ],
   "author": "naimkatiman",
   "license": "MIT",
@@ -29,21 +35,29 @@
     "url": "https://github.com/naimkatiman/continuous-improvement"
   },
   "homepage": "https://github.com/naimkatiman/continuous-improvement#readme",
+  "bugs": {
+    "url": "https://github.com/naimkatiman/continuous-improvement/issues"
+  },
   "bin": {
-    "continuous-improvement": "./bin/install.mjs"
+    "continuous-improvement": "./bin/install.mjs",
+    "ci-lint-transcript": "./bin/lint-transcript.mjs"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "lint": "node bin/lint-transcript.mjs --help"
   },
   "files": [
     "SKILL.md",
     "QUICKSTART.md",
     "CHANGELOG.md",
     "README.md",
+    "llms.txt",
+    "action.yml",
     "bin/",
     "hooks/",
     "commands/",
-    "plugins/"
+    "plugins/",
+    "instinct-packs/"
   ],
   "type": "module"
 }

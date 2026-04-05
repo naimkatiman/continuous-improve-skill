@@ -13,15 +13,16 @@
  */
 
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
-import { join, basename } from "node:path";
+import { join, basename, dirname } from "node:path";
 import { homedir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
 import { createInterface } from "node:readline";
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const VERSION = "3.0.0";
+const VERSION = "3.1.0";
 const INSTINCTS_DIR = join(homedir(), ".claude", "instincts");
 const GLOBAL_DIR = join(INSTINCTS_DIR, "global");
 
@@ -200,6 +201,8 @@ const BEGINNER_TOOLS = [
   },
 ];
 
+const PACKS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "instinct-packs");
+
 const EXPERT_TOOLS = [
   {
     name: "ci_reinforce",
@@ -261,6 +264,22 @@ const EXPERT_TOOLS = [
         scope: { type: "string", description: "Import to: project|global (default: project)", default: "project" },
       },
       required: ["instincts_json"],
+    },
+  },
+  {
+    name: "ci_dashboard",
+    description: "Visual dashboard showing instinct health, observation stats, confidence distribution, and learning progress.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+  {
+    name: "ci_load_pack",
+    description: "Load a starter instinct pack (react, python, go) into the current project.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        pack: { type: "string", description: "Pack name: react, python, or go" },
+      },
+      required: ["pack"],
     },
   },
 ];
@@ -404,6 +423,107 @@ function handleTool(name, params) {
       }
 
       return text(`Imported ${imported} instincts (${toImport.length - imported} skipped as duplicates)`);
+    }
+
+    case "ci_dashboard": {
+      if (MODE !== "expert") return error("ci_dashboard requires expert mode");
+      const level = detectLevel(project.hash);
+      const obsCount = countObservations(project.hash);
+      const instincts = readInstincts(project.hash);
+      const byConf = {
+        auto: instincts.filter((i) => i.confidence >= 0.7),
+        suggest: instincts.filter((i) => i.confidence >= 0.5 && i.confidence < 0.7),
+        silent: instincts.filter((i) => i.confidence < 0.5),
+      };
+      const globalCount = instincts.filter((i) => i.scope === "global").length;
+      const projectCount = instincts.length - globalCount;
+      const today = new Date();
+      const stale = instincts.filter((i) => {
+        if (!i.last_seen) return false;
+        const diff = (today - new Date(i.last_seen)) / (1000 * 60 * 60 * 24);
+        return diff > 30;
+      });
+
+      const autoBar = "█".repeat(Math.min(10, byConf.auto.length)) + "░".repeat(Math.max(0, 10 - byConf.auto.length));
+      const sugBar = "█".repeat(Math.min(10, byConf.suggest.length)) + "░".repeat(Math.max(0, 10 - byConf.suggest.length));
+      const silBar = "█".repeat(Math.min(10, byConf.silent.length)) + "░".repeat(Math.max(0, 10 - byConf.silent.length));
+
+      const top5 = instincts
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, 5)
+        .map((i) => `  ${("█".repeat(Math.round(i.confidence * 10)) + "░".repeat(10 - Math.round(i.confidence * 10)))} ${i.confidence.toFixed(2)} ${i.id}`)
+        .join("\n");
+
+      // Check available packs
+      let packInfo = "";
+      if (existsSync(PACKS_DIR)) {
+        const packs = readdirSync(PACKS_DIR).filter((f) => f.endsWith(".json")).map((f) => f.replace(".json", ""));
+        packInfo = `\n  Available packs: ${packs.join(", ")}`;
+      }
+
+      return text([
+        `╔══════════════════════════════════════════════════════════════╗`,
+        `║              continuous-improvement Dashboard                ║`,
+        `╠══════════════════════════════════════════════════════════════╣`,
+        `║                                                              ║`,
+        `║  Project: ${project.name.padEnd(20)} Level: ${level.padEnd(12)}   ║`,
+        `║  Sessions: ~${String(Math.floor(obsCount / 10)).padEnd(17)} Mode: ${MODE.padEnd(13)}  ║`,
+        `║                                                              ║`,
+        `║  ┌─ Observations ────────────────────────────────────────┐   ║`,
+        `║  │  Total: ${String(obsCount).padEnd(48)} │   ║`,
+        `║  └───────────────────────────────────────────────────────┘   ║`,
+        `║                                                              ║`,
+        `║  ┌─ Instincts ───────────────────────────────────────────┐   ║`,
+        `║  │  Total: ${String(instincts.length).padEnd(48)} │   ║`,
+        `║  │  ${autoBar} Auto-apply (0.7+): ${String(byConf.auto.length).padEnd(20)} │   ║`,
+        `║  │  ${sugBar} Suggest (0.5-0.69): ${String(byConf.suggest.length).padEnd(19)} │   ║`,
+        `║  │  ${silBar} Silent (< 0.5): ${String(byConf.silent.length).padEnd(23)} │   ║`,
+        `║  │  Global: ${String(globalCount).padEnd(10)} Project: ${String(projectCount).padEnd(28)} │   ║`,
+        `║  └───────────────────────────────────────────────────────┘   ║`,
+        `║                                                              ║`,
+        instincts.length > 0 ? [
+          `║  ┌─ Top Instincts ───────────────────────────────────────┐   ║`,
+          ...top5.split("\n").map((l) => `║  │${l.padEnd(56)}│   ║`),
+          `║  └───────────────────────────────────────────────────────┘   ║`,
+        ].join("\n") : "",
+        `║                                                              ║`,
+        `║  ┌─ Health ──────────────────────────────────────────────┐   ║`,
+        `║  │  Stale (30+ days): ${String(stale.length).padEnd(38)} │   ║`,
+        `║  └───────────────────────────────────────────────────────┘   ║`,
+        packInfo ? `║${packInfo.padEnd(63)}║` : "",
+        `║                                                              ║`,
+        `╚══════════════════════════════════════════════════════════════╝`,
+      ].filter(Boolean).join("\n"));
+    }
+
+    case "ci_load_pack": {
+      if (MODE !== "expert") return error("ci_load_pack requires expert mode");
+      const packName = params.pack;
+      const packPath = join(PACKS_DIR, `${packName}.json`);
+      if (!existsSync(packPath)) {
+        const available = existsSync(PACKS_DIR)
+          ? readdirSync(PACKS_DIR).filter((f) => f.endsWith(".json")).map((f) => f.replace(".json", ""))
+          : [];
+        return error(`Unknown pack: ${packName}. Available: ${available.join(", ")}`);
+      }
+
+      const packInstincts = JSON.parse(readFileSync(packPath, "utf8"));
+      const existing = readInstincts(project.hash);
+      const existingIds = new Set(existing.map((i) => i.id));
+      let loaded = 0;
+
+      for (const inst of packInstincts) {
+        if (existingIds.has(inst.id)) continue;
+        writeInstinct(project.hash, {
+          ...inst,
+          source: `pack-${packName}`,
+          scope: "project",
+          observation_count: 0,
+        });
+        loaded++;
+      }
+
+      return text(`Loaded ${loaded}/${packInstincts.length} instincts from **${packName}** pack (${packInstincts.length - loaded} already existed)`);
     }
 
     default:

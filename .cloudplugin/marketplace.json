@@ -1,7 +1,7 @@
 {
   "name": "continuous-improvement",
-  "version": "2.1.0",
-  "description": "7-law discipline framework with auto-leveling instinct learning for AI agents — research, plan, execute, verify, reflect, learn, iterate",
+  "version": "3.1.0",
+  "description": "The 7 Laws of AI Agent Discipline — auto-leveling instinct learning with MCP server, GitHub Action transcript linter, and starter instinct packs",
   "author": "naimkatiman",
   "license": "MIT",
   "repository": "https://github.com/naimkatiman/continuous-improvement",
@@ -14,10 +14,26 @@
         "use the continuous-improvement framework",
         "follow the improvement loop",
         "research plan execute verify reflect",
-        "structured improvement"
+        "structured improvement",
+        "agent discipline"
       ]
     }
   ],
-  "tags": ["productivity", "agent", "discipline", "workflow", "self-improvement"],
-  "compatibleWith": ["claude", "claude-code", "codex", "opencode", "openclaw"]
+  "commands": [
+    {
+      "name": "continuous-improvement",
+      "description": "Reflect, analyze, and show instinct status"
+    },
+    {
+      "name": "discipline",
+      "description": "Quick reference card for the 7 Laws"
+    },
+    {
+      "name": "dashboard",
+      "description": "Visual instinct health dashboard"
+    }
+  ],
+  "instinct_packs": ["react", "python", "go"],
+  "tags": ["productivity", "agent", "discipline", "workflow", "self-improvement", "mcp", "github-action"],
+  "compatibleWith": ["claude", "claude-code", "codex", "opencode", "openclaw", "cursor", "gemini-cli"]
 }

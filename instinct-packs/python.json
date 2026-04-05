@@ -1,0 +1,58 @@
+[
+  {
+    "id": "python-virtual-env",
+    "trigger": "when starting work on a Python project",
+    "body": "Check for virtual environment (venv, .venv, conda) before installing packages. Never install to system Python.",
+    "confidence": 0.7,
+    "domain": "workflow"
+  },
+  {
+    "id": "python-type-hints",
+    "trigger": "when writing Python functions",
+    "body": "Add type hints to function parameters and return values. Use Optional[], list[], dict[] (Python 3.10+) or typing module for older versions.",
+    "confidence": 0.6,
+    "domain": "code-style"
+  },
+  {
+    "id": "python-pathlib",
+    "trigger": "when working with file paths in Python",
+    "body": "Use pathlib.Path instead of os.path for file operations. It's more readable and cross-platform.",
+    "confidence": 0.65,
+    "domain": "patterns"
+  },
+  {
+    "id": "python-context-managers",
+    "trigger": "when opening files or database connections",
+    "body": "Always use context managers (with statement) for files, database connections, and locks. Never rely on manual .close() calls.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "python-list-comprehension",
+    "trigger": "when writing simple for loops that build lists",
+    "body": "Prefer list comprehensions for simple transformations. Use regular for loops when the logic is complex or has side effects.",
+    "confidence": 0.6,
+    "domain": "code-style"
+  },
+  {
+    "id": "python-requirements-check",
+    "trigger": "when adding a new import",
+    "body": "Check if the package is already in requirements.txt, pyproject.toml, or Pipfile before adding. Search for existing usage in the codebase.",
+    "confidence": 0.65,
+    "domain": "workflow"
+  },
+  {
+    "id": "python-pytest-fixtures",
+    "trigger": "when writing Python tests",
+    "body": "Use pytest fixtures for test setup/teardown instead of unittest setUp/tearDown. Use conftest.py for shared fixtures.",
+    "confidence": 0.6,
+    "domain": "testing"
+  },
+  {
+    "id": "python-dataclass",
+    "trigger": "when creating classes that primarily hold data",
+    "body": "Use @dataclass or Pydantic BaseModel instead of plain classes for data containers. They provide __init__, __repr__, and comparison for free.",
+    "confidence": 0.65,
+    "domain": "patterns"
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "go-error-handling",
+    "trigger": "when calling functions that return errors",
+    "body": "Always check returned errors immediately. Never use _ to discard errors unless you've explicitly decided it's safe and documented why.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-defer-cleanup",
+    "trigger": "when opening files, connections, or acquiring locks",
+    "body": "Use defer immediately after acquiring a resource for cleanup. Place defer right after the error check for the acquisition.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-interface-consumer",
+    "trigger": "when defining Go interfaces",
+    "body": "Define interfaces at the consumer side, not the producer side. Keep interfaces small (1-3 methods). Accept interfaces, return structs.",
+    "confidence": 0.65,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-table-driven-tests",
+    "trigger": "when writing Go tests",
+    "body": "Use table-driven tests with subtests (t.Run) for functions with multiple input/output cases. Name test cases descriptively.",
+    "confidence": 0.7,
+    "domain": "testing"
+  },
+  {
+    "id": "go-context-propagation",
+    "trigger": "when writing HTTP handlers or long-running operations",
+    "body": "Accept context.Context as the first parameter. Propagate it to all downstream calls. Use it for cancellation and timeouts.",
+    "confidence": 0.65,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-goroutine-lifecycle",
+    "trigger": "when spawning goroutines",
+    "body": "Always ensure goroutines have a way to exit (context cancellation, done channel, or WaitGroup). Never fire-and-forget goroutines without cleanup.",
+    "confidence": 0.7,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-struct-zero-values",
+    "trigger": "when designing Go structs",
+    "body": "Design structs so their zero value is useful. Use pointer fields only when nil is a meaningful distinct state from zero value.",
+    "confidence": 0.6,
+    "domain": "patterns"
+  },
+  {
+    "id": "go-mod-tidy",
+    "trigger": "when adding or removing dependencies",
+    "body": "Run 'go mod tidy' after adding or removing imports to keep go.mod and go.sum clean.",
+    "confidence": 0.65,
+    "domain": "workflow"
+  }
+]

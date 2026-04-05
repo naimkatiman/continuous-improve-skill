@@ -1,0 +1,43 @@
+# continuous-improvement
+
+> The 7 Laws of AI Agent Discipline — stop your agent from skipping steps, guessing, and declaring "done" without verifying.
+
+## What This Is
+
+A discipline framework for AI coding agents. It teaches agents structured thinking through 7 laws and builds behavioral instincts over time via the Mulahazah learning system.
+
+## Install
+
+```bash
+npx continuous-improvement install
+```
+
+## The 7 Laws
+
+1. Research Before Executing — search before writing
+2. Plan Is Sacred — state WILL/WILL NOT/VERIFY before acting
+3. One Thing at a Time — complete and verify one task before the next
+4. Verify Before Reporting — "done" requires actual proof
+5. Reflect After Sessions — capture what worked and what failed
+6. Iterate One Change — one change, verify, then next
+7. Learn From Every Session — patterns become instincts
+
+## Key Concepts
+
+- **Mulahazah** — auto-leveling learning system that captures tool usage patterns
+- **Instincts** — YAML-based behavioral rules with confidence scoring (0.0-0.9)
+- **Auto-leveling** — CAPTURE → ANALYZE → SUGGEST → AUTO-APPLY (no config needed)
+- **Project-scoped** — instincts are per-project, promoted to global when seen in 2+ projects
+
+## Works With
+
+- Claude Code (full support: skill + hooks + MCP server)
+- Cursor, Zed, Windsurf, VS Code (MCP server)
+- Codex, Gemini CLI, OpenClaw (skill only)
+- Any LLM (paste SKILL.md into system prompt)
+
+## Links
+
+- GitHub: https://github.com/naimkatiman/continuous-improvement
+- npm: https://www.npmjs.com/package/continuous-improvement
+- Skill file: https://raw.githubusercontent.com/naimkatiman/continuous-improvement/main/SKILL.md

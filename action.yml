@@ -1,0 +1,33 @@
+name: 'AI Agent Discipline Linter'
+description: 'Lint AI agent transcripts for compliance with the 7 Laws of AI Agent Discipline'
+author: 'naimkatiman'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  transcript-path:
+    description: 'Path to the agent transcript file (JSONL format)'
+    required: false
+    default: ''
+  observations-path:
+    description: 'Path to observations.jsonl from a CI session'
+    required: false
+    default: ''
+  strict:
+    description: 'Fail the check if any law violations are detected'
+    required: false
+    default: 'false'
+
+outputs:
+  violations:
+    description: 'Number of law violations found'
+  score:
+    description: 'Discipline score (0-100)'
+  report:
+    description: 'Markdown-formatted report'
+
+runs:
+  using: 'node20'
+  main: 'bin/lint-transcript.mjs'

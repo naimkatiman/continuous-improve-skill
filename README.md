@@ -11,8 +11,11 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/continuous-improvement"><img src="https://img.shields.io/npm/v/continuous-improvement" alt="npm"></a>
   <a href="https://www.npmjs.com/package/continuous-improvement"><img src="https://img.shields.io/npm/dm/continuous-improvement" alt="downloads"></a>
+  <a href="https://github.com/naimkatiman/continuous-improvement/stargazers"><img src="https://img.shields.io/github/stars/naimkatiman/continuous-improvement?style=social" alt="stars"></a>
+  <a href="https://github.com/naimkatiman/continuous-improvement/network/members"><img src="https://img.shields.io/github/forks/naimkatiman/continuous-improvement?style=social" alt="forks"></a>
+  <a href="https://github.com/naimkatiman/continuous-improvement/graphs/contributors"><img src="https://img.shields.io/github/contributors/naimkatiman/continuous-improvement" alt="contributors"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="license"></a>
-  <a href="test/"><img src="https://img.shields.io/badge/tests-20%20passing-brightgreen" alt="tests"></a>
+  <a href="test/"><img src="https://img.shields.io/badge/tests-104%20passing-brightgreen" alt="tests"></a>
 </p>
 
 <p align="center">
@@ -20,6 +23,12 @@
   <a href="https://cursor.sh"><img src="https://img.shields.io/badge/Cursor-compatible-blue" alt="Cursor"></a>
   <a href="https://openai.com/codex"><img src="https://img.shields.io/badge/Codex-compatible-blue" alt="Codex"></a>
   <a href="https://ai.google.dev/gemini-api/docs/gemini-cli"><img src="https://img.shields.io/badge/Gemini%20CLI-compatible-blue" alt="Gemini CLI"></a>
+  <a href="https://github.com/naimkatiman/continuous-improvement/actions"><img src="https://img.shields.io/github/actions/workflow/status/naimkatiman/continuous-improvement/ci.yml?label=CI" alt="CI"></a>
+</p>
+
+<p align="center">
+  <a href="docs/README.zh-CN.md">简体中文</a> |
+  <a href="docs/README.ja.md">日本語</a>
 </p>
 
 ---
@@ -102,7 +111,7 @@ npx continuous-improvement install
 
 That's it. For Claude Code, this installs:
 - Observation hooks (captures every tool call, <50ms, jq optional)
-- `/continuous-improvement` command
+- `/continuous-improvement`, `/discipline`, and `/dashboard` commands
 - Auto-leveling instinct system
 
 ### Expert — full power with MCP server
@@ -112,7 +121,7 @@ npx continuous-improvement install --mode expert
 ```
 
 Everything in beginner plus:
-- **MCP server** with 8 tools (instinct management, import/export, observation viewer)
+- **MCP server** with 10 tools (instinct management, import/export, dashboard, instinct packs)
 - **Session hooks** (auto-load instincts at start, remind to reflect at end)
 - Works with Claude Code, Claude Desktop, and any MCP client
 
@@ -123,6 +132,14 @@ npx continuous-improvement install --mode mcp
 ```
 
 Registers the MCP server without hooks — for Cursor, Zed, Windsurf, VS Code, or any editor that supports MCP.
+
+### Load a starter instinct pack
+
+```bash
+npx continuous-improvement install --pack react    # React/Next.js instincts
+npx continuous-improvement install --pack python   # Python best practices
+npx continuous-improvement install --pack go       # Go idioms
+```
 
 ### Install to a specific target
 
@@ -195,10 +212,51 @@ Install:       Hooks start capturing silently. You notice nothing.
 4. **Self-correcting** — user corrections drop confidence by 0.1. Unused instincts decay. Wrong behaviors fade out.
 5. **Project-scoped** — instincts are per-project by default, promoted to global when seen across 2+ projects
 
+### Starter Instinct Packs
+
+Jump-start your instincts with pre-built packs for popular stacks:
+
+```bash
+npx continuous-improvement install --pack react    # 8 React/Next.js instincts
+npx continuous-improvement install --pack python   # 8 Python instincts
+npx continuous-improvement install --pack go       # 8 Go instincts
+```
+
+Or in expert mode: use the `ci_load_pack` tool to load packs at any time.
+
 ### Check what your agent has learned
 
 ```
-/continuous-improvement
+/continuous-improvement    # Reflect, analyze, show status
+/discipline                # Quick reference card of the 7 Laws
+/dashboard                 # Visual instinct health dashboard
+```
+
+---
+
+## GitHub Action: Agent Transcript Linter
+
+Lint your AI agent's behavior in CI/CD. The only GitHub Action that checks if your agent followed disciplined workflows.
+
+```yaml
+- uses: naimkatiman/continuous-improvement@v3
+  with:
+    transcript-path: agent-log.jsonl
+    strict: true  # Fail build on law violations
+```
+
+The linter analyzes tool call patterns and detects:
+- **Law 1 violations** — writes without prior research
+- **Law 3 violations** — too many consecutive edits without verification
+- **Law 4 violations** — code changes without running tests/builds
+- **Law 6 violations** — too many files modified at once
+
+Output includes a discipline score (0-100) and detailed violation report.
+
+```bash
+# Run locally
+node bin/lint-transcript.mjs observations.jsonl
+cat transcript.jsonl | node bin/lint-transcript.mjs --stdin --json
 ```
 
 ---
@@ -222,6 +280,8 @@ Paste SKILL.md into your system prompt. Your agent follows the 7 Laws. No tools,
 |---------|-------------------|--------|
 | Observation hooks | Yes | Yes |
 | `/continuous-improvement` command | Yes | Yes |
+| `/discipline` quick reference | Yes | Yes |
+| `/dashboard` visual dashboard | Yes | Yes |
 | Auto-leveling instincts | Yes | Yes |
 | `ci_status` tool | - | Yes |
 | `ci_instincts` tool | - | Yes |
@@ -230,12 +290,14 @@ Paste SKILL.md into your system prompt. Your agent follows the 7 Laws. No tools,
 | `ci_create_instinct` tool | - | Yes |
 | `ci_observations` tool | - | Yes |
 | `ci_export` / `ci_import` | - | Yes |
+| `ci_dashboard` tool | - | Yes |
+| `ci_load_pack` tool | - | Yes |
 | Session start/end hooks | - | Yes |
 | MCP server | - | Yes |
 
 **Beginner** is the right choice for 90% of users. It just works — install and forget. The system quietly learns from your sessions.
 
-**Expert** adds the MCP server for programmatic access, manual instinct management, import/export for team sharing, and session-level hooks.
+**Expert** adds the MCP server for programmatic access, manual instinct management, import/export for team sharing, visual dashboard, and instinct packs.
 
 ### MCP Tools Reference
 
@@ -249,6 +311,8 @@ Paste SKILL.md into your system prompt. Your agent follows the 7 Laws. No tools,
 | `ci_observations` | View raw tool call observations (expert) |
 | `ci_export` | Export instincts as JSON (expert) |
 | `ci_import` | Import instincts from JSON (expert) |
+| `ci_dashboard` | Visual dashboard with confidence distribution (expert) |
+| `ci_load_pack` | Load starter instinct packs (expert) |
 
 ---
 
@@ -271,16 +335,33 @@ continuous-improvement/
 ├── SKILL.md                           # The 7 Laws + instinct behavior
 ├── bin/
 │   ├── install.mjs                    # CLI installer (--mode beginner|expert|mcp)
-│   └── mcp-server.mjs                # MCP server (zero dependencies)
+│   ├── mcp-server.mjs                # MCP server (zero dependencies)
+│   └── lint-transcript.mjs           # Agent transcript linter (GitHub Action)
 ├── hooks/
 │   ├── observe.sh                     # Observation hook (pure bash, <50ms)
 │   └── session.sh                     # Session start/end hook (expert mode)
 ├── plugins/
-│   ├─��� beginner.json                  # Plugin manifest: 3 tools
-│   └── expert.json                    # Plugin manifest: 8 tools
-├── commands/continuous-improvement.md # /continuous-improvement command
-├── test/                              # 34 tests (node --test)
+│   ├── beginner.json                  # Plugin manifest: 3 tools
+│   └── expert.json                    # Plugin manifest: 10 tools
+├── commands/
+│   ├── continuous-improvement.md     # /continuous-improvement command
+│   ├── discipline.md                 # /discipline quick reference
+│   └── dashboard.md                  # /dashboard visual display
+├── instinct-packs/
+│   ├── react.json                     # React/Next.js starter instincts
+│   ├── python.json                   # Python starter instincts
+│   └── go.json                       # Go starter instincts
+├── test/                              # 104 tests (node --test)
 ├── examples/                          # Real-world before/after scenarios
+├── docs/                              # Translations (zh-CN, ja)
+├── .github/
+│   ├── workflows/ci.yml             # CI pipeline (Node 18/20/22)
+│   └── ISSUE_TEMPLATE/              # Bug report + feature request templates
+├── action.yml                        # GitHub Action definition
+├── llms.txt                          # LLM-friendly project description
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
 ├── QUICKSTART.md
 ├── CHANGELOG.md
 └── package.json
@@ -292,6 +373,8 @@ continuous-improvement/
 ```
 ~/.claude/skills/continuous-improvement/SKILL.md     # The skill
 ~/.claude/commands/continuous-improvement.md          # The command
+~/.claude/commands/discipline.md                     # Quick reference
+~/.claude/commands/dashboard.md                      # Dashboard
 ~/.claude/instincts/
 ├── observe.sh                                       # Hook script
 ├── global/                                          # Global instincts (*.yaml)
@@ -315,7 +398,7 @@ continuous-improvement/
 npx continuous-improvement install --uninstall
 ```
 
-Removes the skill, hooks, and command. Your learned instincts in `~/.claude/instincts/` are preserved — delete that directory manually if you want a clean slate.
+Removes the skill, hooks, and commands. Your learned instincts in `~/.claude/instincts/` are preserved — delete that directory manually if you want a clean slate.
 
 ---
 
@@ -352,7 +435,7 @@ If your agent says any of these, it's skipping a law:
 ### Phase 1: Foundation -- DONE
 
 - [x] Published to public npm (`npx continuous-improvement install` works)
-- [x] 34-test suite (installer, hook, MCP server, plugin configs, SKILL.md validation)
+- [x] 104-test suite (installer, hook, MCP server, linter, packs, community files)
 - [x] Before/after examples in README + `examples/` directory
 - [x] Gemini CLI support
 - [x] Platform badges and improved npm metadata
@@ -360,13 +443,25 @@ If your agent says any of these, it's skipping a law:
 
 ### Phase 2: Plugin Architecture -- DONE
 
-- [x] **MCP server** — 8 tools (beginner: 3, expert: 5 more) with zero dependencies
+- [x] **MCP server** — 10 tools (beginner: 3, expert: 7 more) with zero dependencies
 - [x] **Beginner / Expert separation** — simple defaults, power when you need it
 - [x] **Plugin manifests** — `plugins/beginner.json` and `plugins/expert.json`
 - [x] **Session hooks** — auto-load instincts at session start, remind to reflect at end
 - [x] **`--mode` flag** — `beginner` | `expert` | `mcp` installation modes
 - [x] **Import/export** — share instincts as JSON between team members
 - [x] **Multi-editor MCP support** — Claude Desktop, Cursor, Zed, Windsurf, VS Code
+
+### Phase 2.5: Visibility & Ecosystem -- DONE
+
+- [x] **GitHub Action** — lint agent transcripts for law compliance (`action.yml`)
+- [x] **Starter instinct packs** — React, Python, Go (pre-built instincts)
+- [x] **`/discipline` command** — quick reference card of the 7 Laws
+- [x] **`/dashboard` command** — visual instinct health dashboard
+- [x] **Community files** — CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
+- [x] **llms.txt** — LLM-friendly project description for discoverability
+- [x] **CI pipeline** — GitHub Actions testing on Node 18/20/22
+- [x] **Issue templates** — bug report + feature request
+- [x] **Translations** — Chinese (简体中文) and Japanese (日本語)
 
 ### Phase 3: Content & Proof
 
@@ -376,17 +471,25 @@ If your agent says any of these, it's skipping a law:
 
 ### Phase 4: Ecosystem Growth
 
-- [ ] **GitHub Action** — lint agent transcripts for law compliance
 - [ ] **VS Code extension** — sidebar showing instinct confidence levels
-- [ ] **Quick-start instinct packs** — pre-built instincts for React, Python, Go, etc.
+- [ ] **More instinct packs** — TypeScript, Rust, Java, Django, Laravel
+- [ ] **Instinct marketplace** — share learned instincts across teams
 
 ### Phase 5: Community
 
-- [ ] **Instinct marketplace** — share learned instincts across teams
 - [ ] **Conference talk on Mulahazah** — the auto-leveling system is genuinely novel
 - [ ] **Leaderboard / badges** — "100 sessions" achievement system
+- [ ] **Custom domain** — landing page with interactive demo
 
 ---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Issues and PRs welcome.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the security policy and how to report vulnerabilities.
 
 ## License
 

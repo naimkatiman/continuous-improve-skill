@@ -23,10 +23,12 @@ import {
   writeFileSync,
   rmSync,
   chmodSync,
+  readdirSync,
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -133,14 +135,17 @@ function setupMulahazah() {
     }
   }
 
-  // 4. Copy /continuous-improvement command
+  // 4. Copy all commands
   const commandsDir = join(home, ".claude", "commands");
   mkdirSync(commandsDir, { recursive: true });
-  const cmdSrc = join(REPO_ROOT, "commands", "continuous-improvement.md");
-  const cmdDest = join(commandsDir, "continuous-improvement.md");
-  if (existsSync(cmdSrc)) {
-    copyFileSync(cmdSrc, cmdDest);
-    console.log(`  ✓ /continuous-improvement command → ${cmdDest}`);
+  const commandFiles = ["continuous-improvement.md", "discipline.md", "dashboard.md"];
+  for (const cmdFile of commandFiles) {
+    const cmdSrc = join(REPO_ROOT, "commands", cmdFile);
+    const cmdDest = join(commandsDir, cmdFile);
+    if (existsSync(cmdSrc)) {
+      copyFileSync(cmdSrc, cmdDest);
+      console.log(`  ✓ /${cmdFile.replace(".md", "")} command → ${cmdDest}`);
+    }
   }
 
   // 5. Patch ~/.claude/settings.json with hooks
@@ -301,14 +306,16 @@ function uninstallAll() {
     }
   }
 
-  // 2. Remove /continuous-improvement command
-  const cmdFile = join(home, ".claude", "commands", "continuous-improvement.md");
-  if (existsSync(cmdFile)) {
-    try {
-      rmSync(cmdFile);
-      console.log(`  ✓ Removed /continuous-improvement command`);
-    } catch (err) {
-      console.error(`  ✗ Command file: ${err.message}`);
+  // 2. Remove all commands
+  for (const cmdName of ["continuous-improvement.md", "discipline.md", "dashboard.md"]) {
+    const cmdFile = join(home, ".claude", "commands", cmdName);
+    if (existsSync(cmdFile)) {
+      try {
+        rmSync(cmdFile);
+        console.log(`  ✓ Removed /${cmdName.replace(".md", "")} command`);
+      } catch (err) {
+        console.error(`  ✗ ${cmdName}: ${err.message}`);
+      }
     }
   }
 
@@ -442,7 +449,7 @@ if (args.includes("--uninstall")) {
 }
 
 console.log(`
-continuous-improvement v3.0 (mode: ${INSTALL_MODE})
+continuous-improvement v3.1 (mode: ${INSTALL_MODE})
 Research → Plan → Execute → Verify → Reflect → Learn → Iterate
 `);
 
@@ -485,6 +492,58 @@ const modeInfo = {
   mcp: "MCP server registered. Connect from any MCP-compatible editor.",
 };
 
+// Handle --pack flag
+const packIdx = _args.indexOf("--pack");
+if (packIdx !== -1 && _args[packIdx + 1]) {
+  const packName = _args[packIdx + 1];
+  const packPath = join(REPO_ROOT, "instinct-packs", `${packName}.json`);
+  if (existsSync(packPath)) {
+    const project = getProjectHashSync();
+    const targetDir = join(homedir(), ".claude", "instincts", project.hash);
+    mkdirSync(targetDir, { recursive: true });
+
+    const instincts = JSON.parse(readFileSync(packPath, "utf8"));
+    let loaded = 0;
+    for (const inst of instincts) {
+      const instPath = join(targetDir, `${inst.id}.yaml`);
+      if (!existsSync(instPath)) {
+        const yaml = [
+          `id: ${inst.id}`,
+          `trigger: "${inst.trigger}"`,
+          `confidence: ${inst.confidence}`,
+          `domain: ${inst.domain || "workflow"}`,
+          `source: pack-${packName}`,
+          `scope: project`,
+          `project_id: ${project.hash}`,
+          `created: "${new Date().toISOString().split("T")[0]}"`,
+          `last_seen: "${new Date().toISOString().split("T")[0]}"`,
+          `observation_count: 0`,
+          "---",
+          inst.body,
+        ].join("\n");
+        writeFileSync(instPath, yaml + "\n");
+        loaded++;
+      }
+    }
+    console.log(`  ✓ Loaded ${loaded}/${instincts.length} instincts from ${packName} pack`);
+  } else {
+    const available = readdirSync(join(REPO_ROOT, "instinct-packs"))
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => f.replace(".json", ""));
+    console.error(`  ✗ Unknown pack: ${packName}. Available: ${available.join(", ")}`);
+  }
+}
+
+function getProjectHashSync() {
+  try {
+    const root = execSync("git rev-parse --show-toplevel 2>/dev/null", { encoding: "utf8" }).trim();
+    const hash = execSync(`printf '%s' "${root}" | sha256sum | cut -c1-12`, { encoding: "utf8", shell: "/bin/bash" }).trim();
+    return { root, hash };
+  } catch {
+    return { root: "global", hash: "global" };
+  }
+}
+
 console.log(`
 ${installed > 0 ? "Done." : "Failed."} Installed to ${installed}/${targets.length} target(s).
 ${hasClaude ? `\n${modeInfo[INSTALL_MODE] || modeInfo.beginner}` : ""}
@@ -492,6 +551,8 @@ Next steps:
   1. Start a new Claude Code session
   2. Say: "Use the continuous-improvement framework to [your task]"
   3. After your first task, run: /continuous-improvement
-${INSTALL_MODE === "expert" ? "\nMCP tools available: ci_status, ci_instincts, ci_reflect, ci_reinforce,\n  ci_create_instinct, ci_observations, ci_export, ci_import" : ""}
+  4. Try: /discipline for quick reference, /dashboard for instinct health
+${INSTALL_MODE === "expert" ? "\nMCP tools available: ci_status, ci_instincts, ci_reflect, ci_reinforce,\n  ci_create_instinct, ci_observations, ci_export, ci_import, ci_dashboard, ci_load_pack" : ""}
 ${INSTALL_MODE === "mcp" ? "\nMCP tools available: ci_status, ci_instincts, ci_reflect" : ""}
+Available instinct packs: npx continuous-improvement install --pack react|python|go
 `);

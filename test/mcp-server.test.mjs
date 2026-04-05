@@ -103,7 +103,7 @@ describe("MCP server — beginner mode", () => {
   it("responds to initialize", async () => {
     const resp = await client.send({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} });
     assert.equal(resp.result.serverInfo.name, "continuous-improvement");
-    assert.equal(resp.result.serverInfo.version, "3.0.0");
+    assert.equal(resp.result.serverInfo.version, "3.1.0");
   });
 
   it("lists beginner tools only (3 tools)", async () => {
@@ -184,16 +184,18 @@ describe("MCP server — expert mode", () => {
     rmSync(tempHome, { recursive: true, force: true });
   });
 
-  it("lists all 8 tools in expert mode", async () => {
+  it("lists all 10 tools in expert mode", async () => {
     await client.send({ jsonrpc: "2.0", id: 10, method: "initialize", params: {} });
     const resp = await client.send({ jsonrpc: "2.0", id: 11, method: "tools/list", params: {} });
     const names = resp.result.tools.map((t) => t.name);
-    assert.equal(names.length, 8, `Expected 8 tools, got ${names.length}: ${names.join(", ")}`);
+    assert.equal(names.length, 10, `Expected 10 tools, got ${names.length}: ${names.join(", ")}`);
     assert.ok(names.includes("ci_reinforce"));
     assert.ok(names.includes("ci_create_instinct"));
     assert.ok(names.includes("ci_observations"));
     assert.ok(names.includes("ci_export"));
     assert.ok(names.includes("ci_import"));
+    assert.ok(names.includes("ci_dashboard"));
+    assert.ok(names.includes("ci_load_pack"));
   });
 
   it("ci_export returns JSON array", async () => {
@@ -252,15 +254,15 @@ describe("Plugin configs", () => {
     );
     assert.equal(config.mode, "beginner");
     assert.equal(config.tools.length, 3);
-    assert.equal(config.version, "3.0.0");
+    assert.equal(config.version, "3.1.0");
   });
 
-  it("expert.json is valid and has 8 tools", () => {
+  it("expert.json is valid and has 10 tools", () => {
     const config = JSON.parse(
       readFileSync(join(__dirname, "..", "plugins", "expert.json"), "utf8")
     );
     assert.equal(config.mode, "expert");
-    assert.equal(config.tools.length, 8);
-    assert.equal(config.version, "3.0.0");
+    assert.equal(config.tools.length, 10);
+    assert.equal(config.version, "3.1.0");
   });
 });

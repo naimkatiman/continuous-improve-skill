@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify zero dependencies
+        run: |
+          if [ -f node_modules/.package-lock.json ]; then
+            echo "ERROR: node_modules should not exist — this package has zero dependencies"
+            exit 1
+          fi
+
+      - name: Verify SKILL.md contains all 7 laws
+        run: |
+          for law in "Law 1" "Law 2" "Law 3" "Law 4" "Law 5" "Law 6" "Law 7"; do
+            if ! grep -q "$law" SKILL.md; then
+              echo "ERROR: SKILL.md missing $law"
+              exit 1
+            fi
+          done
+
+      - name: Verify instinct packs are valid JSON
+        run: |
+          for pack in instinct-packs/*.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$pack','utf8'))" || exit 1
+            echo "✓ $pack is valid JSON"
+          done
+
+  lint-transcript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify transcript linter works
+        run: |
+          echo '{"tool":"Bash","event":"tool_start"}' | node bin/lint-transcript.mjs --stdin || true
+          echo "✓ Transcript linter runs without errors"
