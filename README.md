@@ -112,9 +112,14 @@ Install:       Hooks start capturing silently. You notice nothing.
 ```
 continuous-improvement/
 ├── SKILL.md                    # The 7 Laws + instinct behavior
-├── commands/continuous-improvement.md  # The /continuous-improvement command
-├── hooks/observe.sh            # Observation hook (pure bash)
-├── bin/install.mjs             # CLI installer
+├── commands/continuous-improvement.md  # /continuous-improvement command
+├── hooks/observe.sh            # Observation hook (pure bash, <50ms)
+├── bin/
+│   ├── install.mjs             # CLI installer
+│   └── analyze.sh              # Pattern analysis (uses Haiku)
+├── examples/                   # Before/after + real session examples
+├── docs/                       # Philosophy + integration guide
+├── tests/                      # Eval checklists
 ├── QUICKSTART.md               # First-use guide
 ├── CHANGELOG.md
 └── package.json
@@ -126,12 +131,12 @@ continuous-improvement/
 ~/.claude/skills/continuous-improvement/SKILL.md     # The skill
 ~/.claude/commands/continuous-improvement.md          # The command
 ~/.claude/instincts/
-├── observe.sh                                    # Hook script
-├── global/                                       # Global instincts (*.yaml)
+├── observe.sh                                       # Hook script
+├── global/                                          # Global instincts (*.yaml)
 └── <project-hash>/
-    ├── project.json                              # Project metadata
-    ├── observations.jsonl                        # Tool call observations
-    └── *.yaml                                    # Project instincts
+    ├── project.json                                 # Project metadata
+    ├── observations.jsonl                           # Tool call observations
+    └── *.yaml                                       # Project instincts
 ```
 
 ---
@@ -141,6 +146,20 @@ continuous-improvement/
 ```bash
 npx continuous-improvement install --uninstall
 ```
+
+Removes the skill, hooks, and command. Your learned instincts in `~/.claude/instincts/` are preserved — delete that directory manually if you want a clean slate.
+
+---
+
+## Works With
+
+| Tool | Support |
+|------|---------|
+| **Claude Code** | Full — skill + hooks + auto-leveling instincts |
+| **Cursor** | Skill only (paste SKILL.md into rules) |
+| **Codex** | Skill only |
+| **OpenClaw** | Skill only |
+| **Any LLM** | Paste SKILL.md into your system prompt |
 
 ---
 
@@ -153,6 +172,20 @@ If your agent says any of these, it's skipping a law:
 - "I already know how to..." → Law 1 violation (still research)
 - "Let me also add..." → Law 6 violation (finish first)
 - "I'll remember this..." → Law 7 violation (write it down)
+
+---
+
+## Examples
+
+See [examples/](examples/) for real before/after comparisons:
+- [before-after.md](examples/before-after.md) — Side-by-side showing the difference
+- [coding-session.md](examples/coding-session.md) — Real session with the framework active
+- [failure-modes.md](examples/failure-modes.md) — Common agent failures it prevents
+
+## Docs
+
+- [Philosophy](docs/philosophy.md) — Why discipline beats intelligence
+- [Integration Guide](docs/integration-guide.md) — Detailed setup for each tool
 
 ---
 

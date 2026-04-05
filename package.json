@@ -1,6 +1,9 @@
 {
-  "name": "continuous-improvement",
+  "name": "@naimkatiman/continuous-improvement",
   "version": "2.2.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "description": "7-law discipline framework with auto-leveling instinct learning for AI agents — research, plan, execute, verify, reflect, learn, iterate",
   "keywords": [
     "ai-agent",
