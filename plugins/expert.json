@@ -1,0 +1,62 @@
+{
+  "name": "continuous-improvement",
+  "version": "3.0.0",
+  "mode": "expert",
+  "description": "Full plugin: 8 tools including instinct management, import/export, observation viewer, and manual instinct creation.",
+  "tools": [
+    {
+      "name": "ci_status",
+      "what": "See what the system has learned about your project"
+    },
+    {
+      "name": "ci_instincts",
+      "what": "List all learned behaviors with confidence levels"
+    },
+    {
+      "name": "ci_reflect",
+      "what": "Reflect on what you did this session"
+    },
+    {
+      "name": "ci_reinforce",
+      "what": "Accept or reject instinct suggestions to tune confidence"
+    },
+    {
+      "name": "ci_create_instinct",
+      "what": "Manually create instincts with custom triggers and confidence"
+    },
+    {
+      "name": "ci_observations",
+      "what": "View raw tool call observations captured by hooks"
+    },
+    {
+      "name": "ci_export",
+      "what": "Export instincts as JSON for sharing or backup"
+    },
+    {
+      "name": "ci_import",
+      "what": "Import instincts from JSON (skip duplicates)"
+    }
+  ],
+  "setup": {
+    "claude_desktop": {
+      "mcpServers": {
+        "continuous-improvement": {
+          "command": "node",
+          "args": ["<install-path>/bin/mcp-server.mjs", "--mode", "expert"]
+        }
+      }
+    },
+    "claude_code": {
+      "mcpServers": {
+        "continuous-improvement": {
+          "command": "node",
+          "args": ["<install-path>/bin/mcp-server.mjs", "--mode", "expert"]
+        }
+      }
+    }
+  },
+  "hooks": {
+    "included": ["PreToolUse", "PostToolUse", "SessionStart", "SessionEnd"],
+    "description": "Full hook suite: observation capture + session-level instinct loading and auto-reflection."
+  }
+}

@@ -4,6 +4,42 @@ All notable changes to this skill are documented here.
 
 ---
 
+## [3.0.0] — 2026-04-06
+
+### Added
+- **MCP server** (`bin/mcp-server.mjs`) — zero-dependency JSON-RPC stdio server exposing instincts as MCP tools and resources. Works with Claude Code, Claude Desktop, Cursor, Zed, Windsurf, VS Code.
+- **Beginner / Expert modes** — `--mode beginner` (default, 3 tools) vs `--mode expert` (8 tools with import/export, observation viewer, manual instinct creation, confidence tuning)
+- **MCP-only mode** — `--mode mcp` for editors that support MCP but not Claude Code hooks
+- **Plugin manifests** — `plugins/beginner.json` and `plugins/expert.json` describe available tools per mode
+- **Session hooks** (`hooks/session.sh`) — SessionStart loads instincts and shows status; SessionEnd reminds to reflect
+- **Import/export tools** — `ci_export` and `ci_import` for sharing instincts as JSON between team members
+- **34-test suite** — added MCP server tests (beginner + expert mode) and plugin config validation. Up from 20 tests.
+- **Multi-editor MCP support** — installer patches both `settings.json` and `claude_desktop_config.json`
+
+### Changed
+- **Installer upgraded** — `--mode` flag replaces single-mode install. Supports `beginner`, `expert`, `mcp`
+- **Uninstaller upgraded** — cleans up MCP server config, session hooks, and desktop config
+- **Version bump** to 3.0.0 — breaking change: new install modes and MCP server architecture
+
+---
+
+## [2.3.0] — 2026-04-06
+
+### Changed
+- **Public npm** — package name changed from `@naimkatiman/continuous-improvement` to `continuous-improvement`. Removed GitHub Packages publishConfig. `npx continuous-improvement install` now works for everyone.
+- **Expanded keywords** — added `claude-code-skill`, `agent-skill`, `gemini-cli` for better npm discoverability
+- **Improved description** — package description now leads with the value prop, lists supported platforms
+
+### Added
+- **Test suite** — 20 tests covering installer, hook, and SKILL.md validation. Zero dependencies (Node.js built-in test runner).
+- **Before/after examples in README** — collapsible terminal output showing the framework in action vs. without it
+- **Real-world examples** — `examples/` directory with 3 detailed scenarios (bug fix, feature build, refactor)
+- **Platform badges** — Claude Code, Cursor, Codex compatibility badges in README
+- **Gemini CLI** to supported platforms list
+- **Roadmap** — "Roadmap to 1000 Stars" section in README with phased plan
+
+---
+
 ## [2.1.0] — 2026-04-05
 
 ### Changed

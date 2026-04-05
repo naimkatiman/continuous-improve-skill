@@ -1,24 +1,26 @@
 {
-  "name": "@naimkatiman/continuous-improvement",
-  "version": "2.2.0",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
-  "description": "7-law discipline framework with auto-leveling instinct learning for AI agents — research, plan, execute, verify, reflect, learn, iterate",
+  "name": "continuous-improvement",
+  "version": "3.0.0",
+  "description": "The 7 Laws of AI Agent Discipline — stop your agent from skipping steps, guessing, and declaring 'done' without verifying. Auto-leveling instinct learning with MCP server plugin for Claude Code, Cursor, Codex, Gemini CLI.",
   "keywords": [
-    "ai-agent",
     "claude-code",
+    "claude-code-skill",
+    "ai-agent",
+    "agent-skill",
     "codex",
-    "openclaw",
     "cursor",
-    "skill",
-    "continuous-improvement",
+    "gemini-cli",
+    "ai-discipline",
     "workflow",
     "productivity",
     "mulahazah",
     "instinct",
     "learning",
-    "hooks"
+    "hooks",
+    "continuous-improvement",
+    "mcp",
+    "mcp-server",
+    "plugin"
   ],
   "author": "naimkatiman",
   "license": "MIT",
@@ -30,6 +32,9 @@
   "bin": {
     "continuous-improvement": "./bin/install.mjs"
   },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
   "files": [
     "SKILL.md",
     "QUICKSTART.md",
@@ -37,7 +42,8 @@
     "README.md",
     "bin/",
     "hooks/",
-    "commands/"
+    "commands/",
+    "plugins/"
   ],
   "type": "module"
 }

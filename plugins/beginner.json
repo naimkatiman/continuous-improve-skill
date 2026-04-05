@@ -1,0 +1,42 @@
+{
+  "name": "continuous-improvement",
+  "version": "3.0.0",
+  "mode": "beginner",
+  "description": "3 simple tools: check status, view instincts, reflect on sessions. No config needed.",
+  "tools": [
+    {
+      "name": "ci_status",
+      "what": "See what the system has learned about your project"
+    },
+    {
+      "name": "ci_instincts",
+      "what": "List all learned behaviors with confidence levels"
+    },
+    {
+      "name": "ci_reflect",
+      "what": "Reflect on what you did this session"
+    }
+  ],
+  "setup": {
+    "claude_desktop": {
+      "mcpServers": {
+        "continuous-improvement": {
+          "command": "node",
+          "args": ["<install-path>/bin/mcp-server.mjs", "--mode", "beginner"]
+        }
+      }
+    },
+    "claude_code": {
+      "mcpServers": {
+        "continuous-improvement": {
+          "command": "node",
+          "args": ["<install-path>/bin/mcp-server.mjs", "--mode", "beginner"]
+        }
+      }
+    }
+  },
+  "hooks": {
+    "included": ["PreToolUse", "PostToolUse"],
+    "description": "Silently captures every tool call as observations. <50ms, never blocks."
+  }
+}

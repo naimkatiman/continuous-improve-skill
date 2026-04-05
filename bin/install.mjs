@@ -4,12 +4,15 @@
  * continuous-improvement installer
  *
  * Usage:
- *   npx continuous-improvement install                # auto-detect & install
- *   npx continuous-improvement install --target claude # install to ~/.claude/skills/ + Mulahazah
- *   npx continuous-improvement install --target openclaw # install to ~/.openclaw/skills/
- *   npx continuous-improvement install --target cursor # install to ~/.cursor/skills/
- *   npx continuous-improvement install --target all    # install to all detected targets
- *   npx continuous-improvement install --uninstall     # remove from all targets
+ *   npx continuous-improvement install                          # auto-detect & install (beginner)
+ *   npx continuous-improvement install --target claude          # install to ~/.claude/skills/ + Mulahazah
+ *   npx continuous-improvement install --target openclaw        # install to ~/.openclaw/skills/
+ *   npx continuous-improvement install --target cursor          # install to ~/.cursor/skills/
+ *   npx continuous-improvement install --target all             # install to all detected targets
+ *   npx continuous-improvement install --mode beginner          # hooks only (default)
+ *   npx continuous-improvement install --mode expert            # hooks + MCP server + session hooks
+ *   npx continuous-improvement install --mode mcp               # MCP server only (any editor)
+ *   npx continuous-improvement install --uninstall              # remove from all targets
  */
 
 import {
@@ -30,6 +33,11 @@ const __dirname = dirname(__filename);
 const SKILL_SOURCE = join(__dirname, "..", "SKILL.md");
 const SKILL_NAME = "continuous-improvement";
 const REPO_ROOT = join(__dirname, "..");
+
+// Parse --mode flag
+const _args = process.argv.slice(2);
+const _modeIdx = _args.indexOf("--mode");
+const INSTALL_MODE = _modeIdx !== -1 && _args[_modeIdx + 1] ? _args[_modeIdx + 1] : "beginner";
 
 const TARGETS = {
   claude: {
@@ -70,6 +78,17 @@ function installTo(key) {
   }
 
   try {
+    // MCP-only mode: skip skill file copy, just register MCP server
+    if (INSTALL_MODE === "mcp") {
+      if (key === "claude") {
+        setupMulahazah();
+        console.log(`  ✓ ${target.label} → MCP server only`);
+      } else {
+        console.log(`  ⊘ ${target.label} — MCP mode only applies to Claude Code`);
+      }
+      return true;
+    }
+
     mkdirSync(target.dir, { recursive: true });
     copyFileSync(SKILL_SOURCE, join(target.dir, "SKILL.md"));
     console.log(`  ✓ ${target.label} → ${target.dir}/SKILL.md`);
@@ -103,7 +122,18 @@ function setupMulahazah() {
     console.log(`  ✓ observe.sh → ${observeDest}`);
   }
 
-  // 3. Copy /continuous-improvement command
+  // 3. Copy session.sh for expert mode
+  if (INSTALL_MODE === "expert") {
+    const sessionSrc = join(REPO_ROOT, "hooks", "session.sh");
+    const sessionDest = join(instinctsDir, "session.sh");
+    if (existsSync(sessionSrc)) {
+      copyFileSync(sessionSrc, sessionDest);
+      chmodSync(sessionDest, 0o755);
+      console.log(`  ✓ session.sh → ${sessionDest}`);
+    }
+  }
+
+  // 4. Copy /continuous-improvement command
   const commandsDir = join(home, ".claude", "commands");
   mkdirSync(commandsDir, { recursive: true });
   const cmdSrc = join(REPO_ROOT, "commands", "continuous-improvement.md");
@@ -113,8 +143,64 @@ function setupMulahazah() {
     console.log(`  ✓ /continuous-improvement command → ${cmdDest}`);
   }
 
-  // 4. Patch ~/.claude/settings.json with hooks
+  // 5. Patch ~/.claude/settings.json with hooks
   patchClaudeSettings(observeDest);
+
+  // 6. Setup MCP server for expert or mcp mode
+  if (INSTALL_MODE === "expert" || INSTALL_MODE === "mcp") {
+    setupMcpServer();
+  }
+}
+
+function setupMcpServer() {
+  const home = homedir();
+  const mcpServerPath = join(REPO_ROOT, "bin", "mcp-server.mjs");
+  const mcpMode = INSTALL_MODE === "mcp" ? "beginner" : "expert";
+
+  // Patch Claude Code settings.json with MCP server config
+  const settingsPath = join(home, ".claude", "settings.json");
+  let settings = {};
+  if (existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+    } catch {
+      console.warn(`  ! Could not parse settings.json — skipping MCP setup`);
+      return;
+    }
+  }
+
+  if (!settings.mcpServers) settings.mcpServers = {};
+
+  const alreadySetup = settings.mcpServers["continuous-improvement"];
+  if (!alreadySetup) {
+    settings.mcpServers["continuous-improvement"] = {
+      command: "node",
+      args: [mcpServerPath, "--mode", mcpMode],
+    };
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+    console.log(`  ✓ MCP server registered (mode: ${mcpMode})`);
+  } else {
+    console.log(`  ✓ MCP server already registered — no change`);
+  }
+
+  // Also write claude_desktop_config.json if it exists
+  const desktopConfig = join(home, ".claude", "claude_desktop_config.json");
+  if (existsSync(desktopConfig)) {
+    try {
+      const config = JSON.parse(readFileSync(desktopConfig, "utf8"));
+      if (!config.mcpServers) config.mcpServers = {};
+      if (!config.mcpServers["continuous-improvement"]) {
+        config.mcpServers["continuous-improvement"] = {
+          command: "node",
+          args: [mcpServerPath, "--mode", mcpMode],
+        };
+        writeFileSync(desktopConfig, JSON.stringify(config, null, 2) + "\n");
+        console.log(`  ✓ Claude Desktop MCP config updated`);
+      }
+    } catch {
+      // skip
+    }
+  }
 }
 
 function patchClaudeSettings(observePath) {
@@ -159,11 +245,40 @@ function patchClaudeSettings(observePath) {
     }
   }
 
+  // Expert mode: add session hooks
+  if (INSTALL_MODE === "expert") {
+    const sessionPath = join(homedir(), ".claude", "instincts", "session.sh");
+    const sessionHook = {
+      matcher: "",
+      hooks: [{ type: "command", command: `bash "${sessionPath}"` }],
+    };
+
+    // Note: SessionStart/SessionEnd hooks may not be supported in all versions.
+    // We register them — they'll be silently ignored if unsupported.
+    for (const hookType of ["SessionStart", "SessionEnd"]) {
+      if (!Array.isArray(settings.hooks[hookType])) {
+        settings.hooks[hookType] = [];
+      }
+      const alreadyPatched = settings.hooks[hookType].some(
+        (h) =>
+          Array.isArray(h.hooks) &&
+          h.hooks.some((hh) => hh.command && hh.command.includes("session.sh"))
+      );
+      if (!alreadyPatched) {
+        settings.hooks[hookType].push(sessionHook);
+        changed = true;
+      }
+    }
+  }
+
   if (changed) {
     writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
-    console.log(`  ✓ Patched ~/.claude/settings.json with PreToolUse/PostToolUse hooks`);
+    const hookTypes = INSTALL_MODE === "expert"
+      ? "PreToolUse/PostToolUse/SessionStart/SessionEnd"
+      : "PreToolUse/PostToolUse";
+    console.log(`  ✓ Patched ~/.claude/settings.json with ${hookTypes} hooks`);
   } else {
-    console.log(`  ✓ settings.json already has observe.sh hooks — no change needed`);
+    console.log(`  ✓ settings.json already has hooks — no change needed`);
   }
 }
 
@@ -197,24 +312,28 @@ function uninstallAll() {
     }
   }
 
-  // 3. Remove observe.sh from instincts dir
-  const observeFile = join(home, ".claude", "instincts", "observe.sh");
-  if (existsSync(observeFile)) {
-    try {
-      rmSync(observeFile);
-      console.log(`  ✓ Removed observe.sh`);
-    } catch (err) {
-      console.error(`  ✗ observe.sh: ${err.message}`);
+  // 3. Remove observe.sh and session.sh from instincts dir
+  for (const hookFile of ["observe.sh", "session.sh"]) {
+    const filePath = join(home, ".claude", "instincts", hookFile);
+    if (existsSync(filePath)) {
+      try {
+        rmSync(filePath);
+        console.log(`  ✓ Removed ${hookFile}`);
+      } catch (err) {
+        console.error(`  ✗ ${hookFile}: ${err.message}`);
+      }
     }
   }
 
-  // 4. Remove hooks from settings.json
+  // 4. Remove hooks and MCP server from settings.json
   const settingsPath = join(home, ".claude", "settings.json");
   if (existsSync(settingsPath)) {
     try {
       const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
       let changed = false;
-      for (const hookType of ["PreToolUse", "PostToolUse"]) {
+
+      // Remove all hook types
+      for (const hookType of ["PreToolUse", "PostToolUse", "SessionStart", "SessionEnd"]) {
         if (Array.isArray(settings.hooks?.[hookType])) {
           const before = settings.hooks[hookType].length;
           settings.hooks[hookType] = settings.hooks[hookType].filter(
@@ -222,19 +341,41 @@ function uninstallAll() {
               !(
                 Array.isArray(h.hooks) &&
                 h.hooks.some(
-                  (hh) => hh.command && hh.command.includes("observe.sh")
+                  (hh) => hh.command && (hh.command.includes("observe.sh") || hh.command.includes("session.sh"))
                 )
               )
           );
           if (settings.hooks[hookType].length < before) changed = true;
         }
       }
+
+      // Remove MCP server
+      if (settings.mcpServers?.["continuous-improvement"]) {
+        delete settings.mcpServers["continuous-improvement"];
+        changed = true;
+      }
+
       if (changed) {
         writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
-        console.log(`  ✓ Removed hooks from settings.json`);
+        console.log(`  ✓ Removed hooks and MCP server from settings.json`);
       }
     } catch {
       console.warn(`  ! Could not clean settings.json — remove hooks manually`);
+    }
+  }
+
+  // 5. Clean claude_desktop_config.json MCP entry
+  const desktopConfig = join(home, ".claude", "claude_desktop_config.json");
+  if (existsSync(desktopConfig)) {
+    try {
+      const config = JSON.parse(readFileSync(desktopConfig, "utf8"));
+      if (config.mcpServers?.["continuous-improvement"]) {
+        delete config.mcpServers["continuous-improvement"];
+        writeFileSync(desktopConfig, JSON.stringify(config, null, 2) + "\n");
+        console.log(`  ✓ Removed MCP server from Claude Desktop config`);
+      }
+    } catch {
+      // skip
     }
   }
 
@@ -253,13 +394,30 @@ Usage: npx continuous-improvement install [options]
 
 Options:
   --target <name>   Install to specific target (claude, openclaw, cursor, codex, all)
+  --mode <mode>     Installation mode:
+                      beginner  — hooks only, no MCP server (default)
+                      expert    — hooks + MCP server + session hooks + all tools
+                      mcp       — MCP server only (works with any MCP client)
   --uninstall       Remove from all targets
   --help            Show this help
 
+Modes explained:
+  BEGINNER (default)   Just works. Hooks capture silently, instincts grow over time.
+                       3 tools via /continuous-improvement command.
+
+  EXPERT               Everything in beginner + MCP server with 8 tools:
+                       import/export, manual instinct creation, observation viewer,
+                       confidence tuning. Plus session start/end hooks.
+
+  MCP                  MCP server only — for editors that support MCP but not
+                       Claude Code hooks (Cursor, Zed, Windsurf, VS Code).
+
 Examples:
-  npx continuous-improvement install              # auto-detect & install
-  npx continuous-improvement install --target all  # install everywhere
-  npx continuous-improvement install --uninstall   # remove all
+  npx continuous-improvement install                        # beginner (default)
+  npx continuous-improvement install --mode expert          # full power
+  npx continuous-improvement install --mode mcp             # MCP server only
+  npx continuous-improvement install --target all            # install everywhere
+  npx continuous-improvement install --uninstall             # remove all
 `);
 }
 
@@ -284,7 +442,7 @@ if (args.includes("--uninstall")) {
 }
 
 console.log(`
-continuous-improvement v2.2
+continuous-improvement v3.0 (mode: ${INSTALL_MODE})
 Research → Plan → Execute → Verify → Reflect → Learn → Iterate
 `);
 
@@ -321,11 +479,19 @@ for (const t of targets) {
 
 const hasClaude = targets.includes("claude");
 
+const modeInfo = {
+  beginner: "Hooks are capturing silently. System auto-levels as you use it.",
+  expert: "Full plugin active: hooks + MCP server + session hooks. 8 tools available.",
+  mcp: "MCP server registered. Connect from any MCP-compatible editor.",
+};
+
 console.log(`
 ${installed > 0 ? "Done." : "Failed."} Installed to ${installed}/${targets.length} target(s).
-${hasClaude ? "\nHooks are capturing. System auto-levels as you use it." : ""}
+${hasClaude ? `\n${modeInfo[INSTALL_MODE] || modeInfo.beginner}` : ""}
 Next steps:
   1. Start a new Claude Code session
   2. Say: "Use the continuous-improvement framework to [your task]"
   3. After your first task, run: /continuous-improvement
+${INSTALL_MODE === "expert" ? "\nMCP tools available: ci_status, ci_instincts, ci_reflect, ci_reinforce,\n  ci_create_instinct, ci_observations, ci_export, ci_import" : ""}
+${INSTALL_MODE === "mcp" ? "\nMCP tools available: ci_status, ci_instincts, ci_reflect" : ""}
 `);
