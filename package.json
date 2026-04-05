@@ -32,15 +32,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/naimkatiman/continuous-improvement"
+    "url": "git+https://github.com/naimkatiman/continuous-improvement.git"
   },
   "homepage": "https://github.com/naimkatiman/continuous-improvement#readme",
   "bugs": {
     "url": "https://github.com/naimkatiman/continuous-improvement/issues"
   },
   "bin": {
-    "continuous-improvement": "./bin/install.mjs",
-    "ci-lint-transcript": "./bin/lint-transcript.mjs"
+    "continuous-improvement": "bin/install.mjs",
+    "ci-lint-transcript": "bin/lint-transcript.mjs"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
