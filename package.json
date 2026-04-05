@@ -1,7 +1,7 @@
 {
   "name": "continuous-improve-skill",
-  "version": "1.2.0",
-  "description": "A structured self-improvement loop for AI agents — research, plan, execute, verify, reflect, iterate",
+  "version": "2.0.0",
+  "description": "A structured 7-Law self-improvement loop with instinct-based learning for AI agents — research, plan, execute, verify, reflect, learn, iterate",
   "keywords": [
     "ai-agent",
     "claude-code",
@@ -11,7 +11,11 @@
     "skill",
     "continuous-improvement",
     "workflow",
-    "productivity"
+    "productivity",
+    "mulahazah",
+    "instinct",
+    "learning",
+    "hooks"
   ],
   "author": "naimkatiman",
   "license": "MIT",
@@ -28,7 +32,10 @@
     "QUICKSTART.md",
     "CHANGELOG.md",
     "README.md",
+    "config.json",
     "bin/",
+    "hooks/",
+    "agents/",
     ".cloudplugin/"
   ],
   "type": "module"

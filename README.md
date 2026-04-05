@@ -1,8 +1,8 @@
 # continuous-improve
 
-> Stop your AI agent from skipping steps, guessing, and declaring "done" without verifying.
+> Your AI agent that learns from every session — not just follows rules, but builds instincts.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Inspired by](https://img.shields.io/badge/inspired_by-Superpowers-purple)](https://github.com/obra/superpowers)
 
@@ -10,11 +10,33 @@
 
 ## The Problem
 
-AI agents are great at individual steps. They're terrible at discipline.
+AI agents are great at individual steps. They're terrible at discipline — and they never improve.
 
-They skip research. They plan loosely. They declare "done" before verifying. They add features mid-task. They never reflect. Each session, they repeat the same mistakes.
+They skip research. They plan loosely. They declare "done" before verifying. They add features mid-task. They never reflect. Each session, they repeat the same mistakes as the last.
 
-This skill fixes that — not with suggestions, but with **gates** that block forward progress until each phase is actually complete.
+This skill fixes that in two layers:
+
+1. **7 Laws** — gates that block forward progress until each phase is complete
+2. **Mulahazah** — instinct-based learning that observes every session and builds behavioral memory with confidence scoring
+
+---
+
+## What's New in v2.0: Mulahazah
+
+Mulahazah (Arabic: _observation_) is an instinct-learning system that runs alongside Claude Code, watching every tool call and building behavioral memory automatically.
+
+### How it works
+
+- **Hooks observe every tool call** via PreToolUse/PostToolUse — 100% reliable, <50ms overhead
+- **Background Haiku observer** reads observation logs and distills patterns into instincts (optional, cost-efficient)
+- **Atomic instincts** are YAML files with confidence scores (0.3–0.9) and natural decay
+- **Graduated behavior** based on confidence:
+  - 0.3–0.5 (silent): stored but not surfaced — learning in progress
+  - 0.5–0.7 (suggest): mentioned inline when relevant
+  - 0.7+ (auto-apply): behavior applied automatically unless you correct it
+- **Project-scoped learning** — instincts stay in their project context, no cross-contamination
+- **Confidence decay** — instincts weaken without reinforcement; corrections reduce them
+- **One master command:** `/continuous-improve` — status, analyze, reflect, projects
 
 ---
 
@@ -22,7 +44,7 @@ This skill fixes that — not with suggestions, but with **gates** that block fo
 
 ### Option 1: npx (recommended)
 
-Auto-detects your AI tools and installs to all of them:
+Auto-detects your AI tools and installs to all of them. For Claude Code, also sets up Mulahazah:
 
 ```bash
 npx continuous-improve-skill
@@ -31,9 +53,9 @@ npx continuous-improve-skill
 Install to a specific target:
 
 ```bash
-npx continuous-improve-skill --target claude    # Claude Code only
-npx continuous-improve-skill --target openclaw  # OpenClaw only
-npx continuous-improve-skill --target cursor    # Cursor only
+npx continuous-improve-skill --target claude    # Claude Code + full Mulahazah setup
+npx continuous-improve-skill --target openclaw  # OpenClaw only (SKILL.md)
+npx continuous-improve-skill --target cursor    # Cursor only (SKILL.md)
 npx continuous-improve-skill --target all       # All targets
 ```
 
@@ -44,6 +66,8 @@ npx continuous-improve-skill --uninstall
 ```
 
 ### Option 2: One-line shell script
+
+Installs SKILL.md only. For full Mulahazah support, use `npx continuous-improve-skill --target claude`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naimkatiman/continuous-improve-skill/main/install.sh | bash
@@ -78,25 +102,31 @@ Use the continuous-improve framework to [describe your task].
 Your agent should respond with:
 > *"I'm using the continuous-improve framework for this task."*
 
-Then watch it research before planning, plan before executing, and verify before reporting done. If it skips any of those — the skill needs more emphasis in your config.
+Then watch it research before planning, plan before executing, and verify before reporting done. After the task, run:
+
+```
+/continuous-improve
+```
 
 ---
 
 ## How It Works
 
-Five phases. Each has a gate. You can't proceed without passing it.
+Seven laws. Each has a gate. You can't proceed without passing it.
 
 ```
-Research → Plan → Execute → Verify → Reflect
+Research → Plan → Execute → Verify → Reflect → Learn → Iterate
 ```
 
-| Phase | What happens | Gate |
-|-------|-------------|------|
-| **1. Research** | Agent checks what exists, what can break, simplest path | Must answer 4 questions before proceeding |
-| **2. Plan** | Agent writes explicit plan: scope, anti-scope, verification, fallback | Written plan required — vague plan = blocked |
-| **3. Execute** | One task at a time. No scope creep. No parallel work. | Task complete, nothing added out of scope |
+| Law | What happens | Gate |
+|-----|-------------|------|
+| **1. Research** | Agent checks what exists, constraints, risks, simplest path | Must answer 4 questions |
+| **2. Plan** | Explicit plan: scope, anti-scope, verification, fallback | Written plan required |
+| **3. Execute** | One task at a time. No scope creep. No parallel work. | Task complete, in-scope only |
 | **4. Verify** | Agent runs the actual verification command. No assumptions. | Command ran. Output matched. |
-| **5. Reflect** | Agent writes what worked, what failed, what to do differently | Written to learning-log before session closes |
+| **5. Reflect** | What worked, what failed, what to do differently, rule to add | Reflection written |
+| **6. Iterate** | One change → verify → next change. Never skip ahead. | Each change verified before next |
+| **7. Learn** | Patterns → instincts. Corrections → weaker instincts. Repetition → stronger. | Automatic via hooks |
 
 ### The Iron Law
 
@@ -115,31 +145,53 @@ You: Use continuous-improve to add rate limiting to the API.
 
 Agent: I'm using the continuous-improve framework for this task.
 
-[Phase 1 - Research]
+[Law 1 - Research]
 - Checked: middleware/auth.js exists, no rate limiting present
 - Constraint: Redis not available — must use in-memory or express-rate-limit
 - Risk: Shared state won't work across multiple workers
 - Simplest path: express-rate-limit package, single-file middleware
 
-[Phase 2 - Plan]
+[Law 2 - Plan]
 WILL build: rate-limit middleware in middleware/rateLimit.js, applied in app.js
 Will NOT build: Redis adapter, per-user limits, admin override
 Verification: curl -X POST /api/login 6 times rapidly, expect 429 on 6th
 Fallback: manual token bucket if express-rate-limit has issues
 
-[Phase 3 - Execute]
+[Law 3 - Execute]
 Installing express-rate-limit... done
 Writing middleware/rateLimit.js... done
 Applying in app.js... done
 
-[Phase 4 - Verify]
+[Law 4 - Verify]
 Running: curl loop against /api/login × 6
-Result: requests 1-5 → 200, request 6 → 429 ✅
+Result: requests 1-5 → 200, request 6 → 429 ✓
 
-[Phase 5 - Reflect]
-Logged to memory/learning-log.md:
-- express-rate-limit works fine without Redis for single-process apps
-- Anti-scope saved us from over-engineering Redis adapter
+[Law 5 - Reflect]
+- What worked: express-rate-limit drop-in, no config needed
+- What failed: initially applied to all routes, not just /api
+- What I'd do differently: scope middleware more precisely from the start
+- Rule to add: always scope rate limiting to specific route prefixes
+(Rule saved as instinct with 0.6 confidence)
+
+[Law 6 - Iterate]
+One change verified. Task complete. Ready for next.
+
+[Law 7 - Learn]
+Instinct updated: "scope rate-limiting middleware to route prefix, not global app"
+```
+
+---
+
+## /continuous-improve Command
+
+Run after any significant task:
+
+```
+/continuous-improve          # full: reflect + analyze + status
+/continuous-improve status   # instinct overview only
+/continuous-improve projects # list all known projects
+/continuous-improve analyze  # force analysis of pending observations
+/continuous-improve reflect  # trigger Law 5 reflection manually
 ```
 
 ---
@@ -168,9 +220,16 @@ continuous-improve-skill/
 ├── CHANGELOG.md          # What changed between versions
 ├── README.md             # This file
 ├── package.json          # npm package for `npx continuous-improve-skill`
-├── install.sh            # One-line shell installer
+├── install.sh            # One-line shell installer (SKILL.md only)
+├── config.json           # Observer configuration defaults
 ├── bin/
-│   └── install.mjs       # Node.js CLI installer
+│   └── install.mjs       # Node.js CLI installer (with Mulahazah setup)
+├── hooks/
+│   └── observe.sh        # PreToolUse/PostToolUse observation hook (<50ms)
+├── agents/
+│   ├── observer.md       # Background observer agent prompt
+│   ├── observer-loop.sh  # Periodic analysis runner
+│   └── start-observer.sh # Observer launcher with PID management
 └── .cloudplugin/
     └── marketplace.json  # Plugin marketplace metadata
 ```
@@ -187,7 +246,7 @@ The best improvements come from real failure cases — describe what the agent d
 
 ## Inspired By
 
-[Superpowers by Jesse Vincent](https://github.com/obra/superpowers) — the best agentic skills framework out there. This skill applies the same gate-based philosophy to continuous improvement loops.
+[Superpowers by Jesse Vincent](https://github.com/obra/superpowers) — the best agentic skills framework out there. This skill applies the same gate-based philosophy to continuous improvement loops, extended with instinct-based learning.
 
 ---
 
