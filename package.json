@@ -21,7 +21,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/naimkatiman/continuous-improvement.git"
+    "url": "https://github.com/naimkatiman/continuous-improvement"
   },
   "homepage": "https://github.com/naimkatiman/continuous-improvement#readme",
   "bin": {

@@ -1,11 +1,11 @@
 ---
-name: continuous-improve
-description: "7-law discipline framework with auto-leveling instinct learning for AI agents — research, plan, execute, verify, reflect, learn, iterate"
+name: continuous-improvement
+description: "Install structured self-improvement loops with instinct-based learning into Claude Code — research, plan, execute, verify, reflect, learn, iterate. Auto-levels from silent observation to active suggestions to auto-applied behaviors."
 ---
 
-# continuous-improve
+# continuous-improvement
 
-You follow the continuous-improve framework. These 7 laws govern all your work. They are not suggestions.
+You follow the continuous-improvement framework. These 7 laws govern all your work.
 
 ## Law 1: Research Before Executing
 
@@ -158,19 +158,14 @@ Always search with Grep to confirm location before using Edit.
 
 Cap: 0.9 max. Scope: default to project; promote to global when seen in 2+ projects.
 
-## When to Use
+## /continuous-improvement Command
 
-- Any task spanning more than one file
-- Any task where failure has a cost (data loss, broken build, broken deploy)
-- Any task where you've been wrong before
-- Any time you feel the urge to "just try something"
+Run `/continuous-improvement` after significant work:
 
-## Red Flags
+1. **Reflect** — Generate Law 5 reflection
+2. **Analyze** — Process pending observations into instincts
+3. **Status** — Show all instincts with confidence and current level
 
-These thought patterns mean you're skipping a law:
-
-- "I'll just quickly..." → Law 3 violation
-- "This should work..." → Law 4 violation (verify, don't assume)
-- "I already know how to..." → Law 1 violation (still research)
-- "Let me also add..." → Law 6 violation (finish first)
-- "I'll remember this..." → Law 7 violation (write it down)
+Subcommands:
+- `/continuous-improvement status` — Instinct overview only
+- `/continuous-improvement analyze` — Force analysis of pending observations

@@ -1,4 +1,8 @@
-# continuous-improve
+<p align="center">
+  <img src="promo/combined.gif" alt="Before vs After continuous-improvement" width="700" />
+</p>
+
+# continuous-improvement
 
 > Stop your AI agent from skipping steps, guessing, and declaring "done" without verifying.
 
