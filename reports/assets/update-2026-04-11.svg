@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a3e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1" />
+      <stop offset="100%" style="stop-color:#8b5cf6" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#bg)"/>
+  <rect x="0" y="0" width="800" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- Header -->
+  <text x="40" y="50" fill="#a5b4fc" font-family="monospace" font-size="13" font-weight="bold">DAILY IMPROVEMENT REPORT</text>
+  <text x="660" y="50" fill="#6366f1" font-family="monospace" font-size="13">2026-04-11</text>
+
+  <!-- Project name -->
+  <text x="40" y="85" fill="#ffffff" font-family="sans-serif" font-size="26" font-weight="bold">continuous-improvement</text>
+  <text x="40" y="110" fill="#94a3b8" font-family="sans-serif" font-size="14">v3.1.0 — The 7 Laws of AI Agent Discipline</text>
+
+  <!-- Stats boxes -->
+  <rect x="40" y="130" width="160" height="70" rx="10" fill="#1e1e3f" stroke="#6366f1" stroke-width="1"/>
+  <text x="120" y="158" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">TESTS</text>
+  <text x="120" y="185" fill="#22c55e" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">104/104</text>
+
+  <rect x="220" y="130" width="160" height="70" rx="10" fill="#1e1e3f" stroke="#6366f1" stroke-width="1"/>
+  <text x="300" y="158" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">DEPENDENCIES</text>
+  <text x="300" y="185" fill="#22c55e" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">0</text>
+
+  <rect x="400" y="130" width="160" height="70" rx="10" fill="#1e1e3f" stroke="#6366f1" stroke-width="1"/>
+  <text x="480" y="158" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">STAGE</text>
+  <text x="480" y="185" fill="#f59e0b" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">SHIP</text>
+
+  <rect x="580" y="130" width="180" height="70" rx="10" fill="#1e1e3f" stroke="#6366f1" stroke-width="1"/>
+  <text x="670" y="158" fill="#a5b4fc" font-family="monospace" font-size="11" text-anchor="middle">NODE</text>
+  <text x="670" y="185" fill="#22c55e" font-family="monospace" font-size="22" font-weight="bold" text-anchor="middle">>= 18</text>
+
+  <!-- Changes section -->
+  <text x="40" y="240" fill="#a5b4fc" font-family="monospace" font-size="12" font-weight="bold">CHANGES SHIPPED</text>
+  <line x1="40" y1="250" x2="760" y2="250" stroke="#2d2d5e" stroke-width="1"/>
+
+  <circle cx="55" cy="273" r="4" fill="#22c55e"/>
+  <text x="70" y="278" fill="#e2e8f0" font-family="monospace" font-size="13">engines.node >= 18 in package.json</text>
+  <circle cx="55" cy="301" r="4" fill="#22c55e"/>
+  <text x="70" y="306" fill="#e2e8f0" font-family="monospace" font-size="13">CI code coverage (Node 22)</text>
+  <circle cx="55" cy="329" r="4" fill="#22c55e"/>
+  <text x="70" y="334" fill="#e2e8f0" font-family="monospace" font-size="13">CodeQL security scanning</text>
+  <circle cx="55" cy="357" r="4" fill="#22c55e"/>
+  <text x="70" y="362" fill="#e2e8f0" font-family="monospace" font-size="13">CHANGELOG v3.1.0 backfill</text>
+  <circle cx="55" cy="385" r="4" fill="#22c55e"/>
+  <text x="70" y="390" fill="#e2e8f0" font-family="monospace" font-size="13">Local social automation (bin/social.mjs)</text>
+  <circle cx="55" cy="413" r="4" fill="#22c55e"/>
+  <text x="70" y="418" fill="#e2e8f0" font-family="monospace" font-size="13">Scheduled task infrastructure</text>
+
+  <!-- Footer -->
+  <line x1="40" y1="480" x2="760" y2="480" stroke="#2d2d5e" stroke-width="1"/>
+  <text x="40" y="505" fill="#64748b" font-family="monospace" font-size="11">github.com/naimkatiman/continuous-improvement</text>
+  <text x="760" y="505" fill="#6366f1" font-family="monospace" font-size="11" text-anchor="end">#BuildInPublic</text>
+</svg>
